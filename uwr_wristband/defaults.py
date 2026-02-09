@@ -9,7 +9,7 @@ DEFAULTS = {
     "bed_temp": 60,
     "print_speed": 1100,  # mm/min
     "fan_percent": 30,
-    "printer_name": "anycubic_kobra3",
+    "printer_name": "prusa_mk4",
 
     # geometry
     "EW": 0.5,  # extrusion width [mm]

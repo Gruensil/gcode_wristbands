@@ -67,7 +67,7 @@ def default_printer_index() -> int:
     options list."""
     options = get_all_printer_options()
     for i, (_, fc_name) in enumerate(options):
-        if fc_name == "anycubic_kobra3":
+        if fc_name == "prusa_mk4":
             return i
     return 0
 
