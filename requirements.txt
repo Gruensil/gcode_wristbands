@@ -1,0 +1,6 @@
+streamlit>=1.30.0
+fullcontrol>=0.1.1
+numpy
+matplotlib
+shapely>=2.0
+plotly

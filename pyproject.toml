@@ -1,0 +1,17 @@
+[project]
+name = "uwr-wristband"
+version = "1.0.0"
+description = "Streamlit web app for generating 3D-printed UWR wristband G-code"
+requires-python = ">=3.10"
+dependencies = [
+    "streamlit>=1.30.0",
+    "fullcontrol>=0.1.1",
+    "numpy",
+    "matplotlib",
+    "shapely>=2.0",
+    "plotly",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
