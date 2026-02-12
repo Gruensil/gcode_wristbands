@@ -18,7 +18,7 @@ Each wristband is printed as a single continuous spiral with embossed text on th
 
 ```bash
 # Clone the repo
-git clone https://github.com/sirgru/uwr_wristband.git
+git clone https://github.com/gruensil/gcode_wristbands.git
 cd uwr_wristband
 
 # Install dependencies
@@ -55,6 +55,17 @@ Toggle "Show advanced settings" in the sidebar to access:
 - Design tuning (wiggle amplitude/frequency, text size)
 - Quality presets (50k / 100k / 150k points per spiral)
 - Ease-in/out settings for clean top and bottom edges
+
+## Printing Tips
+
+- **Measuring your wrist:** Wrap a tape measure snugly around the wrist and note the circumference in mm. The band stretches slightly, so a snug fit is fine. Currently would recommend to deduct 10mm.
+- **Material:** Use TPU (flexible filament). 95A is just fine. Softer ones might be smoother but are more expensive and more difficult to print.
+- **Bed adhesion:** TPU sticks well to PEI and glass beds.
+- **First layer:** Print slowly (~50 % speed) for good adhesion. The default ease-in settings handle this.
+- **Temperatures:** Defaults are nozzle 220 °C / bed 60 °C. Lower to ~210 °C for softer TPU.
+- **Speed:** TPU prints best at moderate speeds. The default 1100 mm/min (~18 mm/s) is a safe starting point. Bowden extruders may need slower.
+- **Removing from bed:** Let the print cool fully before removing — TPU peels off easily once cool.
+- **Multi-band prints:** Check that all bands fit on your printer's bed. The app warns you if the grid footprint exceeds the build area. But you can indeed push the limits with the spacing (because we are dealing with TPU here). So although the print head might collide with an already printed band it pushed the old one aside with ease. That way i could easily fit 3x3 bands on my 250x250 buildplate.
 
 ## Project Structure
 

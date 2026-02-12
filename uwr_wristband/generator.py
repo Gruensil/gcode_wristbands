@@ -13,6 +13,8 @@ import math
 from typing import Callable, List, Optional, Sequence, Tuple
 
 import numpy as np
+
+from uwr_wristband import BAND_VERSION
 from matplotlib.font_manager import FontProperties
 from matplotlib.textpath import TextPath
 from matplotlib.transforms import Affine2D
@@ -523,4 +525,10 @@ def generate_gcode_string(
     )
 
     gcode = fc.transform(steps, "gcode", gcode_controls, show_tips=False)
-    return gcode
+
+    # Prepend a version header so prints can be traced to the generator revision.
+    header = (
+        f"; UWR Wristband Generator — band version {BAND_VERSION}\n"
+        f"; https://github.com/gruensil/gcode_wristbands\n"
+    )
+    return header + gcode

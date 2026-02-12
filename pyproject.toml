@@ -13,6 +13,10 @@ dependencies = [
     "plotly",
 ]
 
+[project.urls]
+Homepage = "https://github.com/gruensil/gcode_wristbands"
+Repository = "https://github.com/gruensil/gcode_wristbands"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
