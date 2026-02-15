@@ -7,7 +7,7 @@ import math
 import pandas as pd
 import streamlit as st
 
-from uwr_wristband import APP_VERSION, BAND_VERSION
+from uwr_wristband import APP_VERSION, GENERATOR_VERSION
 from uwr_wristband.defaults import (
     DEFAULTS,
     MAX_CIRCUMFERENCE,
@@ -41,7 +41,7 @@ st.title("UWR Wristband Generator")
 st.caption(
     "Generate custom G-code for 3D-printed underwater rugby wristbands. "
     "Adjust settings in the sidebar, then hit **Generate G-code**.  \n"
-    f"App v{APP_VERSION} · Band v{BAND_VERSION}"
+    f"App v{APP_VERSION} · Generator v{GENERATOR_VERSION}"
 )
 
 st.warning(
@@ -219,7 +219,7 @@ st.caption(
 
 band_df = st.data_editor(
     default_df,
-    use_container_width=True,
+    width="stretch",
     num_rows="fixed",
     column_config={
         "Front Text": st.column_config.TextColumn(
@@ -328,12 +328,12 @@ with col_left:
     generate_btn = st.button(
         "Generate G-code",
         type="primary",
-        use_container_width=True,
+        width="stretch",
         disabled=num_active == 0,
     )
     preview_btn = st.button(
         "Show 3D Preview",
-        use_container_width=True,
+        width="stretch",
         disabled=num_active == 0,
     )
 
@@ -413,16 +413,30 @@ with col_left:
             data=st.session_state.gcode,
             file_name=filename,
             mime="text/plain",
-            use_container_width=True,
+            width="stretch",
         )
 
 with col_right:
     if st.session_state.preview_fig is not None:
         st.plotly_chart(
-            st.session_state.preview_fig, use_container_width=True
+            st.session_state.preview_fig, width="stretch"
         )
     else:
         st.info("Click **Show 3D Preview** to see the wristband model.")
+
+# ---------------------------------------------------------------------------
+# What is UWR?
+# ---------------------------------------------------------------------------
+with st.expander("What is UWR?"):
+    st.markdown(
+        "Underwater rugby (UWR) is a fast-paced team sport played in a deep pool. "
+        "Two teams of six try to get a saltwater-filled ball into a basket at the "
+        "bottom of the opposing end. It's fully three-dimensional — players dive, "
+        "pass, and tackle underwater while holding their breath. Wristbands help "
+        "identify players and their respective team (white or blue/black) during "
+        "the game.\n\n"
+        "[Watch UWR in action](https://youtu.be/dx4tbtoWzvA?si=hUjfREuN5V7mm_EU)"
+    )
 
 # ---------------------------------------------------------------------------
 # Printing tips
@@ -448,6 +462,10 @@ softer TPU.
 **Speed:** TPU prints best at moderate speeds. The default 1100 mm/min (~18 mm/s)
 is a safe starting point. Bowden extruders may need slower.
 
+**Slicer preview:** Orca Slicer (and other Orca-based slicers) may display the G-code
+flat in one plane — the Z height looks wrong in the preview. This is a display issue
+only; the actual print uses the correct Z values and prints fine.
+
 **Removing from bed:** Let the print cool fully before removing — TPU peels off
 easily once cool.
 
@@ -457,4 +475,25 @@ with the spacing (because we are dealing with TPU here). So although the print h
 might collide with an already printed band it pushes the old one aside with ease.
 That way you can easily fit 3x3 bands on a 250x250 build plate.
 """
+    )
+
+# ---------------------------------------------------------------------------
+# Acknowledgements
+# ---------------------------------------------------------------------------
+with st.expander("Acknowledgements"):
+    st.markdown(
+        "The meander pattern used in the wristband generation is based on the paper "
+        "[*River meanders — Theory of minimum variance*](https://pubs.usgs.gov/publication/pp422H) "
+        "by Langbein & Leopold (1966). The mathematical model of natural river meandering "
+        "provided the foundation for the spiral-wiggle geometry that gives the bands "
+        "their flexibility and distinctive look.\n\n"
+        "The Streamlit app, project structure, and UI wiring were vibecoded with the help of "
+        "Claude Code. However, the core wristband generation logic — the spiral-meander math, "
+        "text polygon projection, ease-in/out curves, grid assembly, and the fullcontrol "
+        "integration — was designed, tested, and iterated on by hand over multiple "
+        "print cycles. The geometry had to be right to produce bands that actually print well, "
+        "flex correctly, and feel good on a wrist. AI helped scaffold the webapp; the engineering "
+        "behind the G-code is human. I have printed at least >100 bands during the making of this code. "
+        "'Why?' you ask? It was just a dumb idea in the beginning, but it turned into a fun side quest. "
+        "And now here we are..."
     )

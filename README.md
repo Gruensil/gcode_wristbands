@@ -4,6 +4,12 @@ A Streamlit web app for generating G-code for 3D-printed wristbands. Originally 
 
 Each wristband is printed as a single continuous spiral with embossed text on the front and back. The spiral-meander pattern gives the bands flexibility and a distinctive look.
 
+## What is UWR?
+
+Underwater rugby (UWR) is a fast-paced team sport played in a deep pool. Two teams of six try to get a saltwater-filled ball into a basket at the bottom of the opposing end. It's fully three-dimensional — players dive, pass, and tackle underwater while holding their breath. Wristbands help identify players and their respective team (white or blue/black) during the game.
+
+[Watch UWR in action](https://youtu.be/dx4tbtoWzvA?si=hUjfREuN5V7mm_EU)
+
 ## Features
 
 - **Custom text** — set front text (name/team) and back text (number) per band
@@ -64,6 +70,7 @@ Toggle "Show advanced settings" in the sidebar to access:
 - **First layer:** Print slowly (~50 % speed) for good adhesion. The default ease-in settings handle this.
 - **Temperatures:** Defaults are nozzle 220 °C / bed 60 °C. Lower to ~210 °C for softer TPU.
 - **Speed:** TPU prints best at moderate speeds. The default 1100 mm/min (~18 mm/s) is a safe starting point. Bowden extruders may need slower.
+- **Slicer preview:** Orca Slicer (and other Orca-based slicers) may display the G-code flat in one plane — the Z height looks wrong in the preview. This is a display issue only; the actual print uses the correct Z values and prints fine.
 - **Removing from bed:** Let the print cool fully before removing — TPU peels off easily once cool.
 - **Multi-band prints:** Check that all bands fit on your printer's bed. The app warns you if the grid footprint exceeds the build area. But you can indeed push the limits with the spacing (because we are dealing with TPU here). So although the print head might collide with an already printed band it pushed the old one aside with ease. That way i could easily fit 3x3 bands on my 250x250 buildplate.
 
@@ -88,9 +95,13 @@ The wristband is generated as a continuous spiral path with a sinusoidal radial 
 
 The spiral generation uses vectorized [Shapely 2.0](https://shapely.readthedocs.io/) `contains_xy()` for fast point-in-polygon testing (~10x faster than per-point checks). G-code is produced by [fullcontrol](https://github.com/FullControlXYZ/fullcontrol), which handles printer-specific start/end sequences, extrusion math, and travel moves.
 
+## Acknowledgements
+
+The meander pattern used in the wristband generation is based on the paper [*River meanders — Theory of minimum variance*](https://pubs.usgs.gov/publication/pp422H) by Langbein & Leopold (1966). The mathematical model of natural river meandering provided the foundation for the spiral-wiggle geometry that gives the bands their flexibility and distinctive look.
+
 ## A Note on How This Was Built
 
-The Streamlit app, project structure, and UI wiring were vibecoded with the help of Claude Code. However, the core wristband generation logic — the spiral-meander math, text polygon projection, ease-in/out curves, grid assembly, and the fullcontrol integration — was carefully designed, tested, and iterated on by hand over multiple print cycles. The geometry had to be right to produce bands that actually print well, flex correctly, and look good on a wrist. AI helped scaffold the webapp; the engineering behind the G-code is human. I have printed at least >100 bands during the making of this code.
+The Streamlit app, project structure, and UI wiring were vibecoded with the help of Claude Code. However, the core wristband generation logic — the spiral-meander math, text polygon projection, ease-in/out curves, grid assembly, and the fullcontrol integration — was designed, tested, and iterated on by hand over multiple print cycles. The geometry had to be right to produce bands that actually print well, flex correctly, and feel good on a wrist. AI helped scaffold the webapp; the engineering behind the G-code is human. I have printed at least >100 bands during the making of this code. "Why?" you ask? It was just a dumb idea in the beginning, but it turned into a fun side quest. And now here we are...
 
 ## Disclaimer
 
