@@ -72,6 +72,7 @@ Toggle "Show advanced settings" in the sidebar to access:
 - **Speed:** TPU prints best at moderate speeds. The default 1100 mm/min (~18 mm/s) is a safe starting point. Bowden extruders may need slower.
 - **Slicer preview:** Orca Slicer (and other Orca-based slicers) may display the G-code flat in one plane — the Z height looks wrong in the preview. This is a display issue only; the actual print uses the correct Z values and prints fine.
 - **Removing from bed:** Let the print cool fully before removing — TPU peels off easily once cool.
+- **STL / vase mode:** When printing an exported STL in vase mode, set the X-Y contour compensation (sometimes called "outer wall offset" or "XY compensation") to match your extrusion width / layer height. This ensures the slicer's toolpath lines up with the meander pattern.
 - **Multi-band prints:** Check that all bands fit on your printer's bed. The app warns you if the grid footprint exceeds the build area. But you can indeed push the limits with the spacing (because we are dealing with TPU here). So although the print head might collide with an already printed band it pushed the old one aside with ease. That way i could easily fit 3x3 bands on my 250x250 buildplate.
 
 ## Project Structure

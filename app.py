@@ -21,6 +21,7 @@ from uwr_wristband.generator import (
     build_params,
     generate_gcode_string,
 )
+from uwr_wristband.stl_export import generate_stl_export
 from uwr_wristband.printers import (
     default_printer_index,
     get_all_printer_options,
@@ -68,6 +69,12 @@ if "preview_fig" not in st.session_state:
     st.session_state.preview_fig = None
 if "steps" not in st.session_state:
     st.session_state.steps = None
+if "stl_data" not in st.session_state:
+    st.session_state.stl_data = None
+if "stl_filename" not in st.session_state:
+    st.session_state.stl_filename = None
+if "stl_mime" not in st.session_state:
+    st.session_state.stl_mime = None
 
 # ---------------------------------------------------------------------------
 # Sidebar
@@ -341,6 +348,11 @@ with col_left:
         width="stretch",
         disabled=num_active == 0,
     )
+    stl_btn = st.button(
+        "Generate STL",
+        width="stretch",
+        disabled=num_active == 0,
+    )
 
     if generate_btn:
         st.session_state.gcode = None
@@ -411,6 +423,36 @@ with col_left:
                     with st.expander("Details"):
                         st.exception(exc)
 
+    if stl_btn:
+        st.session_state.stl_data = None
+
+        progress = st.progress(0, text="Generating STL...")
+
+        def _update_stl(current: int, total: int) -> None:
+            progress.progress(
+                current / total,
+                text=f"Generating band {current} of {total}...",
+            )
+
+        try:
+            stl_bytes, stl_name, stl_mime = generate_stl_export(
+                params, stride=1, progress_callback=_update_stl
+            )
+            st.session_state.stl_data = stl_bytes
+            st.session_state.stl_filename = stl_name
+            st.session_state.stl_mime = stl_mime
+            progress.empty()
+            st.success(
+                f"STL generated ({len(stl_bytes) / 1024:.0f} KB, "
+                f"{num_active} band{'s' if num_active != 1 else ''}). "
+                "Click **Download** below."
+            )
+        except Exception as exc:
+            progress.empty()
+            st.error(f"STL generation failed: {exc}")
+            with st.expander("Details"):
+                st.exception(exc)
+
     if st.session_state.gcode is not None:
         filename = f"uwr_wristband_{text_front}_{text_back}.gcode"
         st.download_button(
@@ -418,6 +460,15 @@ with col_left:
             data=st.session_state.gcode,
             file_name=filename,
             mime="text/plain",
+            width="stretch",
+        )
+
+    if st.session_state.stl_data is not None:
+        st.download_button(
+            "Download .stl" if st.session_state.stl_mime == "application/sla" else "Download .zip (STL)",
+            data=st.session_state.stl_data,
+            file_name=st.session_state.stl_filename,
+            mime=st.session_state.stl_mime,
             width="stretch",
         )
 
@@ -473,6 +524,11 @@ only; the actual print uses the correct Z values and prints fine.
 
 **Removing from bed:** Let the print cool fully before removing — TPU peels off
 easily once cool.
+
+**STL / vase mode:** When printing an exported STL in vase mode, set the X-Y contour
+compensation (sometimes called "outer wall offset" or "XY compensation") to match your
+extrusion width / layer height. This ensures the slicer's toolpath lines up with the
+meander pattern.
 
 **Multi-band prints:** Check that all bands fit on your printer's bed. The app warns
 you if the grid footprint exceeds the build area. But you can indeed push the limits

@@ -132,8 +132,8 @@ def generate_spiral_meander_with_side_emboss(
     phi_max: float = math.pi * 0.59,
     start_shift_turns: float = 1.0,
     initial_z: float = 0.14,
-) -> List[Tuple[float, float, float]]:
-    """Generate a spiral (x, y, z) point list with sinusoidal radial wiggle.
+) -> np.ndarray:
+    """Generate spiral points as an (N, 3) numpy array with sinusoidal radial wiggle.
 
     Text regions are detected using vectorised ``shapely.contains_xy`` (shapely
     >= 2.0) instead of per-point ``Polygon.contains(Point(...))``, giving
@@ -199,7 +199,7 @@ def generate_spiral_meander_with_side_emboss(
     y = cy + r * np.sin(theta)
     z_out = np.maximum(z_vals, initial_z)
 
-    return list(zip(x.tolist(), y.tolist(), z_out.tolist()))
+    return np.column_stack((x, y, z_out))
 
 
 # ---------------------------------------------------------------------------
@@ -207,7 +207,7 @@ def generate_spiral_meander_with_side_emboss(
 # ---------------------------------------------------------------------------
 
 def build_steps_from_points(
-    spiral_points: Sequence[Tuple[float, float, float]],
+    spiral_points,
     EW: float,
     EH: float,
     initial_z: float,
@@ -233,7 +233,8 @@ def build_steps_from_points(
         fc.Printer(print_speed=print_speed * reduced_print_speed_factor)
     )
 
-    usable_height = max(0.0, float(max(p[2] for p in spiral_points)))
+    pts_array = np.asarray(spiral_points)
+    usable_height = max(0.0, float(pts_array[:, 2].max()))
     current_width = None
     current_fan = reduced_fan_percent
     current_speed = print_speed * reduced_print_speed_factor
@@ -501,6 +502,79 @@ def build_params(
         params["grid_first_center"] = (40.0, 48.0)
 
     return params
+
+
+def generate_band_arrays(
+    params: dict,
+    progress_callback: Optional[Callable[[int, int], None]] = None,
+) -> List[Tuple[np.ndarray, Tuple[float, float], dict]]:
+    """Generate raw numpy point arrays per band (for STL export).
+
+    Returns a list of ``(points, center_xy, config)`` tuples where *points*
+    is an (N, 3) numpy array, *center_xy* is the cylinder axis center, and
+    *config* is the band's spiral_config dict.
+    """
+    grid_first_center = params["grid_first_center"]
+    grid_nx = params["grid_nx"]
+    grid_ny = params["grid_ny"]
+    grid_spacing = params["grid_spacing"]
+    spiral_configs = params.get("spiral_configs", [])
+
+    total_spirals = sum(
+        1
+        for idx in range(grid_nx * grid_ny)
+        if idx < len(spiral_configs) and spiral_configs[idx] is not None
+    )
+
+    results: List[Tuple[np.ndarray, Tuple[float, float], dict]] = []
+    spiral_index = 0
+    completed = 0
+    for iy in range(grid_ny):
+        for ix in range(grid_nx):
+            idx = spiral_index
+            spiral_index += 1
+
+            if idx >= len(spiral_configs) or spiral_configs[idx] is None:
+                continue
+
+            config = spiral_configs[idx]
+            cx = grid_first_center[0] + ix * grid_spacing[0]
+            cy = grid_first_center[1] + iy * grid_spacing[1]
+
+            circ = config.get("circumference", params["circumference"])
+            front_text = config.get("text_front", params["text_front"])
+            back_text = config.get("text_back", params["text_back"])
+
+            if back_text is not None:
+                back_text = str(back_text)
+
+            base_r = circ / (2.0 * math.pi)
+
+            pts = generate_spiral_meander_with_side_emboss(
+                total_height=params["total_height"],
+                base_radius=base_r,
+                wiggle_amplitude=params["wiggle_amplitude"],
+                wiggle_frequency=params["wiggle_frequency"],
+                spiral_layer_thickness=params["spiral_layer_thickness"],
+                center_point=(cx, cy),
+                text_front=front_text,
+                text_back=back_text,
+                text_font=params.get("text_font", "DejaVu Sans"),
+                text_size=params.get("text_size", 1.0),
+                text_position_yz=params.get("text_position_yz", (0.0, 0.0)),
+                num_points=params.get("num_points_per_spiral", 100_000),
+                phi_max=params.get("phi_max", math.pi * 0.59),
+                start_shift_turns=params.get("start_shift_turns", 1.0),
+                initial_z=params.get("initial_z", 0.14),
+            )
+
+            results.append((pts, (cx, cy), config))
+
+            completed += 1
+            if progress_callback is not None:
+                progress_callback(completed, total_spirals)
+
+    return results
 
 
 def generate_gcode_string(
