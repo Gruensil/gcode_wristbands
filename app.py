@@ -45,6 +45,12 @@ st.caption(
     f"App v{APP_VERSION} · Generator v{GENERATOR_VERSION}"
 )
 
+st.info(
+    "**New in v1.1.0:** STL export is now available! Generate an STL file for vase-mode slicing "
+    "if your printer doesn't support raw G-code.",
+    icon="🆕",
+)
+
 st.warning(
     "**Disclaimer:** Running generated G-code on your 3D printer is entirely at your own risk. "
     "Always review the G-code and verify printer settings before printing. "
