@@ -204,6 +204,7 @@ num_slots = grid_nx * grid_ny
 
 # Build default dataframe for the band list
 default_data = {
+    "Enabled": [True] * num_slots,
     "Front Text": [text_front] * num_slots,
     "Back Text": [text_back] * num_slots,
     "Circumference (mm)": [circumference] * num_slots,
@@ -214,7 +215,7 @@ default_df.index.name = "#"
 
 st.caption(
     f"Grid: **{grid_nx} x {grid_ny}** = {num_slots} slots. "
-    "Clear the Front Text to leave a slot empty."
+    "Uncheck **Enabled** to skip a slot. Texts can be left blank."
 )
 
 band_df = st.data_editor(
@@ -222,6 +223,9 @@ band_df = st.data_editor(
     width="stretch",
     num_rows="fixed",
     column_config={
+        "Enabled": st.column_config.CheckboxColumn(
+            default=True,
+        ),
         "Front Text": st.column_config.TextColumn(
             max_chars=MAX_TEXT_LENGTH,
         ),
@@ -237,18 +241,19 @@ band_df = st.data_editor(
     },
 )
 
-# Convert dataframe to spiral_configs (None for empty rows)
+# Convert dataframe to spiral_configs (None for disabled rows)
 spiral_configs = []
 for _, row in band_df.iterrows():
+    enabled = bool(row["Enabled"]) if pd.notna(row["Enabled"]) else True
+    if not enabled:
+        spiral_configs.append(None)
+        continue
     front = str(row["Front Text"]).strip() if pd.notna(row["Front Text"]) else ""
     back = str(row["Back Text"]).strip() if pd.notna(row["Back Text"]) else ""
     circ = float(row["Circumference (mm)"]) if pd.notna(row["Circumference (mm)"]) else circumference
-    if front:
-        spiral_configs.append(
-            {"text_front": front, "text_back": back, "circumference": circ}
-        )
-    else:
-        spiral_configs.append(None)
+    spiral_configs.append(
+        {"text_front": front, "text_back": back, "circumference": circ}
+    )
 
 num_active = sum(1 for c in spiral_configs if c is not None)
 
@@ -288,7 +293,7 @@ if num_active > 0 and (footprint_x > vol_x or footprint_y > vol_y):
     )
 
 if num_active == 0:
-    st.info("No bands configured. Fill in the Front Text for at least one row.")
+    st.info("No bands configured. Enable at least one row in the table above.")
 
 # ---------------------------------------------------------------------------
 # Build params
