@@ -24,6 +24,7 @@ from uwr_wristband.generator import (
     build_params,
     generate_gcode_string,
 )
+from uwr_wristband.logo import render_logo_svg
 from uwr_wristband.stl_export import generate_stl_export
 from uwr_wristband.printers import (
     default_printer_index,
@@ -41,11 +42,25 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("UWR Wristband Generator")
-st.caption(
-    "Generate custom G-code for 3D-printed underwater rugby wristbands. "
-    "Adjust settings in the sidebar, then hit **Generate G-code**.  \n"
-    f"App v{APP_VERSION} · Generator v{GENERATOR_VERSION}"
+_logo_col, _title_col = st.columns(
+    [1, 10], vertical_alignment="center", gap="small"
+)
+with _logo_col:
+    st.markdown(render_logo_svg(size=140), unsafe_allow_html=True)
+with _title_col:
+    st.title("UWR Wristband Generator")
+    st.caption(
+        "Generate custom G-code for 3D-printed underwater rugby wristbands. "
+        "Adjust settings in the sidebar, then hit **Generate G-code**.  \n"
+        f"App v{APP_VERSION} · Generator v{GENERATOR_VERSION}"
+    )
+
+st.info(
+    "**New in v1.3.0:** Longer texts are now supported! Text is projected *around* "
+    "the band (arc-length wrapping) instead of being flattened onto the front/back "
+    "plane, so characters no longer get squished near the sides and can extend "
+    "much further around the circumference.",
+    icon="🆕",
 )
 
 st.info(

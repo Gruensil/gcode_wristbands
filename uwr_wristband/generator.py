@@ -148,8 +148,10 @@ def generate_spiral_meander_with_side_emboss(
             text_front, text_font, text_size, text_position_yz, mirror=False
         )
     if text_back:
+        # In arc-length projection, the back observer's left→right matches
+        # the polygon's natural X direction — no mirror needed.
         text_back_poly = build_text_multipolygon(
-            text_back, text_font, text_size, text_position_yz, mirror=True
+            text_back, text_font, text_size, text_position_yz, mirror=False
         )
 
     turns = float(total_height) / float(spiral_layer_thickness)
@@ -169,27 +171,25 @@ def generate_spiral_meander_with_side_emboss(
     z_vals = (t / (2.0 * math.pi)) * spiral_layer_thickness + initial_z - z_shift
     z_vals = np.maximum(z_vals, initial_z)
 
-    # Test positions (before text emboss scaling)
-    r_test = base_radius + d_r
-    x_test = r_test * np.cos(theta)
-    y_test = r_test * np.sin(theta)
+    # --- Vectorised text containment via arc-length projection ---
+    # Map the spiral's running angle to a signed angle in [-π, π) around
+    # two reference axes — the front (θ = 0) and the back (θ = π) — then
+    # convert to arc length on the cylinder surface.  This wraps the text
+    # *around* the band instead of projecting it flat onto the Y axis, so
+    # characters stay the correct width anywhere along the circumference
+    # and are no longer bounded by the band diameter.
+    theta_front = ((theta + math.pi) % (2.0 * math.pi)) - math.pi
+    theta_back = (theta % (2.0 * math.pi)) - math.pi
+    arc_front = base_radius * theta_front
+    arc_back = base_radius * theta_back
 
-    # --- Vectorised text containment via shapely 2.0 ---
     in_text = np.zeros(len(t), dtype=bool)
 
     if text_front_poly is not None:
-        front_mask = x_test >= 0
-        if np.any(front_mask):
-            in_text[front_mask] |= contains_xy(
-                text_front_poly, y_test[front_mask], z_vals[front_mask]
-            )
+        in_text |= contains_xy(text_front_poly, arc_front, z_vals)
 
     if text_back_poly is not None:
-        back_mask = x_test <= 0
-        if np.any(back_mask):
-            in_text[back_mask] |= contains_xy(
-                text_back_poly, y_test[back_mask], z_vals[back_mask]
-            )
+        in_text |= contains_xy(text_back_poly, arc_back, z_vals)
 
     # Apply text emboss scaling
     d_r_final = d_r.copy()
