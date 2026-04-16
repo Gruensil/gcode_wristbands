@@ -119,6 +119,10 @@ with st.sidebar:
             max_value=MAX_CIRCUMFERENCE,
             value=DEFAULTS["circumference"],
             step=5.0,
+            help=(
+                "Inner circumference of the band in mm. Measure the wrist snugly "
+                "and subtract ~10 mm — the TPU stretches slightly when worn."
+            ),
         )
     else:
         circumference = SIZE_PRESETS[size_choice]
@@ -127,34 +131,28 @@ with st.sidebar:
     show_advanced = st.checkbox("Show advanced settings")
 
     if show_advanced:
-        st.subheader("Print Settings")
-        nozzle_temp = st.number_input(
-            "Nozzle temp (C)", 180, 280, DEFAULTS["nozzle_temp"]
-        )
-        bed_temp = st.number_input("Bed temp (C)", 0, 120, DEFAULTS["bed_temp"])
-        print_speed = st.number_input(
-            "Print speed (mm/min)", 300, 3000, DEFAULTS["print_speed"], step=100
-        )
-        fan_percent = st.slider("Fan %", 0, 100, DEFAULTS["fan_percent"])
-        EW = st.number_input(
-            "Extrusion width (mm)", 0.2, 1.2, DEFAULTS["EW"], step=0.05, format="%.2f"
-        )
-        EH = st.number_input(
-            "Layer height (mm)", 0.05, 0.4, DEFAULTS["EH"], step=0.05, format="%.2f"
-        )
-        total_height = st.number_input(
-            "Band height (mm)", 5.0, 40.0, DEFAULTS["total_height"], step=1.0
-        )
-
         st.subheader("Design Tuning")
+        total_height = st.number_input(
+            "Band height (mm)", 5.0, 40.0, DEFAULTS["total_height"], step=1.0,
+            help="Total height (Z dimension) of the finished wristband.",
+        )
         wiggle_amplitude = st.number_input(
-            "Wiggle amplitude", 10.0, 200.0, DEFAULTS["wiggle_amplitude"], step=5.0
+            "Wiggle amplitude", 10.0, 200.0, DEFAULTS["wiggle_amplitude"], step=5.0,
+            help=(
+                "Radial amplitude of the meander pattern. Higher = deeper wiggle, "
+                "more flex in the finished band but also more material."
+            ),
         )
         wiggle_frequency = st.number_input(
-            "Wiggle frequency", 20.0, 200.0, DEFAULTS["wiggle_frequency"], step=5.0
+            "Wiggle frequency", 20.0, 200.0, DEFAULTS["wiggle_frequency"], step=5.0,
+            help=(
+                "Number of wiggle cycles around the spiral. Higher = tighter, "
+                "finer meander; lower = longer, smoother waves."
+            ),
         )
         text_size = st.number_input(
-            "Text size", 4.0, 20.0, DEFAULTS["text_size"], step=1.0
+            "Text size", 4.0, 20.0, DEFAULTS["text_size"], step=1.0,
+            help="Approximate text character height in mm on the side of the band.",
         )
         text_emboss_factor = st.number_input(
             "Text emboss factor",
@@ -172,9 +170,53 @@ with st.sidebar:
 
         st.subheader("Quality")
         quality_labels = list(QUALITY_PRESETS.keys())
-        quality_choice = st.selectbox("Point density", quality_labels, index=1)
+        quality_choice = st.selectbox(
+            "Point density", quality_labels, index=1,
+            help=(
+                "Number of points sampled per spiral. Higher density = smoother "
+                "curves but slower generation and larger G-code / STL files."
+            ),
+        )
         num_points = QUALITY_PRESETS[quality_choice]
-
+    
+        st.subheader("Print Settings")
+        st.caption(
+            "These settings are baked into the **G-code only**. They have no "
+            "effect on STL export — configure those in your slicer instead."
+        )
+        nozzle_temp = st.number_input(
+            "Nozzle temp (C)", 180, 280, DEFAULTS["nozzle_temp"],
+            help="**G-code only.** Hotend temperature. 220 °C is a good TPU starting point; try ~210 °C for softer TPU.",
+        )
+        bed_temp = st.number_input(
+            "Bed temp (C)", 0, 120, DEFAULTS["bed_temp"],
+            help="**G-code only.** Heated-bed temperature. 60 °C works well for TPU on PEI / glass.",
+        )
+        print_speed = st.number_input(
+            "Print speed (mm/min)", 300, 3000, DEFAULTS["print_speed"], step=100,
+            help=(
+                "**G-code only.** Main travel-over-material speed. 1100 mm/min (~18 mm/s) "
+                "is a safe TPU default — Bowden extruders may need slower."
+            ),
+        )
+        fan_percent = st.slider(
+            "Fan %", 0, 100, DEFAULTS["fan_percent"],
+            help="**G-code only.** Part-cooling fan duty cycle during printing.",
+        )
+        EW = st.number_input(
+            "Extrusion width (mm)", 0.2, 1.2, DEFAULTS["EW"], step=0.05, format="%.2f",
+            help=(
+                "**G-code only.** Width of a single extruded line. Typically matches or slightly "
+                "exceeds the nozzle diameter (0.4 mm nozzle → 0.4–0.5 mm)."
+            ),
+        )
+        EH = st.number_input(
+            "Layer height (mm)", 0.05, 0.4, DEFAULTS["EH"], step=0.05, format="%.2f",
+            help=(
+                "**G-code only.** Height of each printed layer / spiral pitch. 0.2 mm is the standard "
+                "default for TPU and also the recommended setting for STL vase mode."
+            ),
+        )
         ease_in_height = st.number_input(
             "Ease-in height (mm)",
             0.0,
@@ -182,6 +224,12 @@ with st.sidebar:
             DEFAULTS["ease_in_height"],
             step=0.2,
             format="%.1f",
+            help=(
+                "**G-code only.** Bottom region (in mm) where the extrusion width "
+                "ramps up from reduced → full. Gives the first layers a thinner start. "
+                "(Has no effect on STL geometry — the slicer "
+                "controls first-layer width there.)"
+            ),
         )
         ease_out_height = st.number_input(
             "Ease-out height (mm)",
@@ -190,10 +238,20 @@ with st.sidebar:
             DEFAULTS["ease_out_height"],
             step=0.2,
             format="%.1f",
+            help=(
+                "**G-code only.** Top region (in mm) where the extrusion width "
+                "ramps back down, giving the band a cleaner, rounder finishing edge."
+            ),
         )
         ease_strength = st.slider(
-            "Ease strength", 0.0, 1.0, DEFAULTS["ease_strength"], step=0.05
+            "Ease strength", 0.0, 1.0, DEFAULTS["ease_strength"], step=0.05,
+            help=(
+                "**G-code only.** How strongly the extrusion width is attenuated "
+                "in the ease-in/out regions. 0 = full width everywhere, 1 = width "
+                "tapers to zero at the very ends."
+            ),
         )
+        
     else:
         nozzle_temp = DEFAULTS["nozzle_temp"]
         bed_temp = DEFAULTS["bed_temp"]
@@ -218,16 +276,28 @@ st.header("Bands")
 
 grid_col1, grid_col2, grid_col3, grid_col4 = st.columns(4)
 with grid_col1:
-    grid_nx = st.number_input("Columns", min_value=1, max_value=5, value=1)
+    grid_nx = st.number_input(
+        "Columns", min_value=1, max_value=5, value=1,
+        help="Number of bands along the X axis of the build plate.",
+    )
 with grid_col2:
-    grid_ny = st.number_input("Rows", min_value=1, max_value=5, value=1)
+    grid_ny = st.number_input(
+        "Rows", min_value=1, max_value=5, value=1,
+        help="Number of bands along the Y axis of the build plate.",
+    )
 with grid_col3:
     grid_spacing_x = st.number_input(
-        "X spacing (mm)", min_value=50.0, max_value=200.0, value=90.0, step=5.0
+        "X spacing (mm)", min_value=50.0, max_value=200.0, value=90.0, step=5.0,
+        help=(
+            "Center-to-center distance between bands along X. TPU is soft enough "
+            "that you can push this tighter than the band diameter — the head "
+            "will just nudge already-printed bands aside."
+        ),
     )
 with grid_col4:
     grid_spacing_y = st.number_input(
-        "Y spacing (mm)", min_value=50.0, max_value=200.0, value=86.0, step=5.0
+        "Y spacing (mm)", min_value=50.0, max_value=200.0, value=86.0, step=5.0,
+        help="Center-to-center distance between bands along Y.",
     )
 
 num_slots = grid_nx * grid_ny
