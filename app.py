@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+
+DOCS_DIR = Path(__file__).parent / "docs"
 
 from uwr_wristband import APP_VERSION, GENERATOR_VERSION
 from uwr_wristband.defaults import (
@@ -153,6 +156,19 @@ with st.sidebar:
         text_size = st.number_input(
             "Text size", 4.0, 20.0, DEFAULTS["text_size"], step=1.0
         )
+        text_emboss_factor = st.number_input(
+            "Text emboss factor",
+            1.0,
+            3.0,
+            DEFAULTS["text_emboss_factor"],
+            step=0.1,
+            format="%.2f",
+            help=(
+                "Multiplier on the wiggle amplitude at text points — controls how "
+                "far the text stands out from the band. 1.0 = flush, 1.6 = default, "
+                "higher = more pronounced relief."
+            ),
+        )
 
         st.subheader("Quality")
         quality_labels = list(QUALITY_PRESETS.keys())
@@ -189,6 +205,7 @@ with st.sidebar:
         wiggle_amplitude = DEFAULTS["wiggle_amplitude"]
         wiggle_frequency = DEFAULTS["wiggle_frequency"]
         text_size = DEFAULTS["text_size"]
+        text_emboss_factor = DEFAULTS["text_emboss_factor"]
         num_points = DEFAULTS["num_points_per_spiral"]
         ease_in_height = DEFAULTS["ease_in_height"]
         ease_out_height = DEFAULTS["ease_out_height"]
@@ -326,6 +343,7 @@ params = build_params(
     wiggle_amplitude=wiggle_amplitude,
     wiggle_frequency=wiggle_frequency,
     text_size=text_size,
+    text_emboss_factor=text_emboss_factor,
     ease_in_height=ease_in_height,
     ease_out_height=ease_out_height,
     ease_strength=ease_strength,
@@ -503,46 +521,11 @@ with st.expander("What is UWR?"):
 # ---------------------------------------------------------------------------
 # Printing tips
 # ---------------------------------------------------------------------------
-with st.expander("Printing Tips"):
-    st.markdown(
-        """\
-**Measuring your wrist:** Wrap a tape measure snugly around the wrist and note the
-circumference in mm. The band stretches slightly, so a snug fit is fine. Currently
-would recommend to deduct 10 mm.
+with st.expander("Printing Tips — G-code"):
+    st.markdown((DOCS_DIR / "tips_gcode.md").read_text(encoding="utf-8"))
 
-**Material:** Use TPU (flexible filament). 95A is just fine. Softer ones might be
-smoother but are more expensive and more difficult to print.
-
-**Bed adhesion:** TPU sticks well to PEI and glass beds.
-
-**First layer:** Print slowly (~50 % speed) for good adhesion. The default ease-in
-settings handle this.
-
-**Temperatures:** Defaults are nozzle 220 °C / bed 60 °C. Lower to ~210 °C for
-softer TPU.
-
-**Speed:** TPU prints best at moderate speeds. The default 1100 mm/min (~18 mm/s)
-is a safe starting point. Bowden extruders may need slower.
-
-**Slicer preview:** Orca Slicer (and other Orca-based slicers) may display the G-code
-flat in one plane — the Z height looks wrong in the preview. This is a display issue
-only; the actual print uses the correct Z values and prints fine.
-
-**Removing from bed:** Let the print cool fully before removing — TPU peels off
-easily once cool.
-
-**STL / vase mode:** When printing an exported STL in vase mode, set the X-Y contour
-compensation (sometimes called "outer wall offset" or "XY compensation") to match your
-extrusion width / layer height. This ensures the slicer's toolpath lines up with the
-meander pattern.
-
-**Multi-band prints:** Check that all bands fit on your printer's bed. The app warns
-you if the grid footprint exceeds the build area. But you can indeed push the limits
-with the spacing (because we are dealing with TPU here). So although the print head
-might collide with an already printed band it pushes the old one aside with ease.
-That way you can easily fit 3x3 bands on a 250x250 build plate.
-"""
-    )
+with st.expander("Printing Tips — STL (vase mode)"):
+    st.markdown((DOCS_DIR / "tips_stl.md").read_text(encoding="utf-8"))
 
 # ---------------------------------------------------------------------------
 # Acknowledgements

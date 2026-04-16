@@ -128,6 +128,7 @@ def generate_spiral_meander_with_side_emboss(
     text_font: str = "DejaVu Sans",
     text_size: float = 1.0,
     text_position_yz: Tuple[float, float] = (0.0, 0.0),
+    text_emboss_factor: float = 1.6,
     num_points: int = 200_000,
     phi_max: float = math.pi * 0.59,
     start_shift_turns: float = 1.0,
@@ -192,7 +193,7 @@ def generate_spiral_meander_with_side_emboss(
 
     # Apply text emboss scaling
     d_r_final = d_r.copy()
-    d_r_final[in_text] *= 1.6
+    d_r_final[in_text] *= text_emboss_factor
 
     r = base_radius + d_r_final
     x = cx + r * np.cos(theta)
@@ -337,6 +338,7 @@ def assemble_grid_steps(
                 text_font=params.get("text_font", "DejaVu Sans"),
                 text_size=params.get("text_size", 1.0),
                 text_position_yz=params.get("text_position_yz", (0.0, 0.0)),
+                text_emboss_factor=params.get("text_emboss_factor", 1.6),
                 num_points=params.get("num_points_per_spiral", 100_000),
                 phi_max=params.get("phi_max", math.pi * 0.59),
                 start_shift_turns=params.get("start_shift_turns", 1.0),
@@ -430,6 +432,7 @@ def build_params(
     wiggle_amplitude: float = 50.0,
     wiggle_frequency: float = 80.0,
     text_size: float = 10.0,
+    text_emboss_factor: float = 1.6,
     ease_in_height: float = 0.8,
     ease_out_height: float = 0.8,
     ease_strength: float = 0.95,
@@ -465,6 +468,7 @@ def build_params(
             "wiggle_amplitude": wiggle_amplitude,
             "wiggle_frequency": wiggle_frequency,
             "text_size": text_size,
+            "text_emboss_factor": text_emboss_factor,
             "text_position_yz": (0.0, 0.5 * total_height),
             "ease_in_height": ease_in_height,
             "ease_out_height": ease_out_height,
@@ -562,6 +566,7 @@ def generate_band_arrays(
                 text_font=params.get("text_font", "DejaVu Sans"),
                 text_size=params.get("text_size", 1.0),
                 text_position_yz=params.get("text_position_yz", (0.0, 0.0)),
+                text_emboss_factor=params.get("text_emboss_factor", 1.6),
                 num_points=params.get("num_points_per_spiral", 100_000),
                 phi_max=params.get("phi_max", math.pi * 0.59),
                 start_shift_turns=params.get("start_shift_turns", 1.0),
