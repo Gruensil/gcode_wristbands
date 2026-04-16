@@ -165,6 +165,27 @@ with st.sidebar:
                 "finer meander; lower = longer, smoother waves."
             ),
         )
+        phase_shift_fraction = st.number_input(
+            "Phase shift per layer (× wiggle wavelength)",
+            -1.0,
+            1.0,
+            DEFAULTS["per_layer_phase_shift"] / (2.0 * math.pi),
+            step=0.005,
+            format="%.3f",
+            help=(
+                "How far the wiggle pattern is advanced between consecutive "
+                "spiral turns, measured in units of the wiggle's own wavelength. "
+                "0 = meanders stack (almost) vertically. ±0.5 = shifted by half a wiggle "
+                "per layer (checkerboard look). ±1 = shifted by a full wavelength "
+                "(visually identical to 0 for the wiggle itself). "
+                "Non-zero values skew the meander pattern diagonally across "
+                "the band — sign controls which way. Note: this is a *phase* "
+                "shift, not the physical tilt angle of the meander columns; "
+                "the visible slant also depends on circumference, wiggle "
+                "frequency, and layer height."
+            ),
+        )
+        per_layer_phase_shift = phase_shift_fraction * 2.0 * math.pi
         text_size = st.number_input(
             "Text size", 4.0, 20.0, DEFAULTS["text_size"], step=1.0,
             help="Approximate text character height in mm on the side of the band.",
@@ -277,6 +298,7 @@ with st.sidebar:
         total_height = DEFAULTS["total_height"]
         wiggle_amplitude = DEFAULTS["wiggle_amplitude"]
         wiggle_frequency = DEFAULTS["wiggle_frequency"]
+        per_layer_phase_shift = DEFAULTS["per_layer_phase_shift"]
         text_size = DEFAULTS["text_size"]
         text_emboss_factor = DEFAULTS["text_emboss_factor"]
         num_points = DEFAULTS["num_points_per_spiral"]
@@ -427,6 +449,7 @@ params = build_params(
     total_height=total_height,
     wiggle_amplitude=wiggle_amplitude,
     wiggle_frequency=wiggle_frequency,
+    per_layer_phase_shift=per_layer_phase_shift,
     text_size=text_size,
     text_emboss_factor=text_emboss_factor,
     ease_in_height=ease_in_height,

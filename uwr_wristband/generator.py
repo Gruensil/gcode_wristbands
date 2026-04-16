@@ -133,6 +133,7 @@ def generate_spiral_meander_with_side_emboss(
     phi_max: float = math.pi * 0.59,
     start_shift_turns: float = 1.0,
     initial_z: float = 0.14,
+    per_layer_phase_shift: float = 0.0,
 ) -> np.ndarray:
     """Generate spiral points as an (N, 3) numpy array with sinusoidal radial wiggle.
 
@@ -157,11 +158,19 @@ def generate_spiral_meander_with_side_emboss(
     turns = float(total_height) / float(spiral_layer_thickness)
     t = np.linspace(0.0, turns * 2.0 * np.pi, int(num_points))
 
-    cos_vals = np.cos(phi_max * np.sin(wiggle_frequency * t))
-    sin_vals = np.sin(phi_max * np.sin(wiggle_frequency * t))
+    # Decouple "wiggles per turn" from "phase advance per turn".  The raw wiggle
+    # argument is ``effective_freq * t``, so after one turn (Δt = 2π) the phase
+    # advances by ``effective_freq * 2π`` = ``wiggle_frequency * 2π`` +
+    # ``per_layer_phase_shift``.  With per_layer_phase_shift = 0 and integer
+    # wiggle_frequency, meanders align vertically; non-zero values skew the
+    # meander pattern across layers.
+    effective_freq = wiggle_frequency + per_layer_phase_shift / (2.0 * math.pi)
+
+    cos_vals = np.cos(phi_max * np.sin(effective_freq * t))
+    sin_vals = np.sin(phi_max * np.sin(effective_freq * t))
     dt = np.gradient(t)
 
-    factor = calculate_scale_factor(phi_max, wiggle_frequency)
+    factor = calculate_scale_factor(phi_max, effective_freq)
     theta = factor * np.cumsum(cos_vals * dt)
     d_r = wiggle_amplitude * np.cumsum(sin_vals * dt)
 
@@ -343,6 +352,7 @@ def assemble_grid_steps(
                 phi_max=params.get("phi_max", math.pi * 0.59),
                 start_shift_turns=params.get("start_shift_turns", 1.0),
                 initial_z=params.get("initial_z", 0.14),
+                per_layer_phase_shift=params.get("per_layer_phase_shift", 0.0),
             )
 
             local = build_steps_from_points(
@@ -431,6 +441,7 @@ def build_params(
     total_height: float = 18.0,
     wiggle_amplitude: float = 50.0,
     wiggle_frequency: float = 80.0,
+    per_layer_phase_shift: float = 0.0,
     text_size: float = 10.0,
     text_emboss_factor: float = 1.6,
     ease_in_height: float = 0.8,
@@ -467,6 +478,7 @@ def build_params(
             "total_height": total_height,
             "wiggle_amplitude": wiggle_amplitude,
             "wiggle_frequency": wiggle_frequency,
+            "per_layer_phase_shift": per_layer_phase_shift,
             "text_size": text_size,
             "text_emboss_factor": text_emboss_factor,
             "text_position_yz": (0.0, 0.5 * total_height),
@@ -571,6 +583,7 @@ def generate_band_arrays(
                 phi_max=params.get("phi_max", math.pi * 0.59),
                 start_shift_turns=params.get("start_shift_turns", 1.0),
                 initial_z=params.get("initial_z", 0.14),
+                per_layer_phase_shift=params.get("per_layer_phase_shift", 0.0),
             )
 
             results.append((pts, (cx, cy), config))

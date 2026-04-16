@@ -19,6 +19,7 @@ DEFAULTS = {
     "circumference": 165.0,  # mm
     "wiggle_amplitude": 50.0,  # mm
     "wiggle_frequency": 80.0,  # cycles around spiral
+    "per_layer_phase_shift": 0.0,  # radians of wiggle phase advance per turn (0 = meanders align vertically)
     "spiral_layer_thickness": 0.2,  # mm
     "center_point": (150.0, 150.0),  # mm
 
