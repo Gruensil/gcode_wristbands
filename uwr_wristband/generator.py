@@ -47,7 +47,8 @@ def build_text_multipolygon(
     height = bbox.height
 
     transform = Affine2D().translate(
-        position[0] - width / 2.0, position[1] - height / 2.0
+        position[0] - bbox.x0 - width / 2.0,
+        position[1] - bbox.y0 - height / 2.0,
     )
     raw_polys = tp.to_polygons()
 
@@ -444,6 +445,7 @@ def build_params(
     per_layer_phase_shift: float = 0.0,
     text_size: float = 10.0,
     text_emboss_factor: float = 1.6,
+    text_vertical_offset: float = 0.0,
     ease_in_height: float = 0.8,
     ease_out_height: float = 0.8,
     ease_strength: float = 0.95,
@@ -481,7 +483,7 @@ def build_params(
             "per_layer_phase_shift": per_layer_phase_shift,
             "text_size": text_size,
             "text_emboss_factor": text_emboss_factor,
-            "text_position_yz": (0.0, 0.5 * total_height),
+            "text_position_yz": (0.0, 0.5 * total_height + text_vertical_offset),
             "ease_in_height": ease_in_height,
             "ease_out_height": ease_out_height,
             "ease_strength": ease_strength,

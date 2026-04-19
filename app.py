@@ -203,6 +203,18 @@ with st.sidebar:
                 "higher = more pronounced relief."
             ),
         )
+        text_vertical_offset = st.number_input(
+            "Text vertical offset (mm)",
+            -float(total_height) / 2.0,
+            float(total_height) / 2.0,
+            float(DEFAULTS["text_vertical_offset"]),
+            step=0.5,
+            format="%.1f",
+            help=(
+                "Shift text up (+) or down (-) from the vertical center of the "
+                "band. 0 = centered."
+            ),
+        )
 
         st.subheader("Quality")
         quality_labels = list(QUALITY_PRESETS.keys())
@@ -301,6 +313,7 @@ with st.sidebar:
         per_layer_phase_shift = DEFAULTS["per_layer_phase_shift"]
         text_size = DEFAULTS["text_size"]
         text_emboss_factor = DEFAULTS["text_emboss_factor"]
+        text_vertical_offset = DEFAULTS["text_vertical_offset"]
         num_points = DEFAULTS["num_points_per_spiral"]
         ease_in_height = DEFAULTS["ease_in_height"]
         ease_out_height = DEFAULTS["ease_out_height"]
@@ -453,6 +466,7 @@ params = build_params(
     per_layer_phase_shift=per_layer_phase_shift,
     text_size=text_size,
     text_emboss_factor=text_emboss_factor,
+    text_vertical_offset=text_vertical_offset,
     ease_in_height=ease_in_height,
     ease_out_height=ease_out_height,
     ease_strength=ease_strength,

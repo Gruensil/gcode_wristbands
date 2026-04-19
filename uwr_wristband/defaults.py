@@ -30,6 +30,7 @@ DEFAULTS = {
     "text_back": "123",
     "text_font": "DejaVu Sans",
     "text_emboss_factor": 1.5,  # multiplier on wiggle amplitude at text points (1.0 = flat)
+    "text_vertical_offset": 0.0,  # mm offset from vertical center of band (+ = up, - = down)
 
     # ease-in/out and startup
     "ease_in_height": 4 * 0.2,
