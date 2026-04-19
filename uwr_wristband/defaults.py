@@ -29,7 +29,7 @@ DEFAULTS = {
     "text_front": "TEST",
     "text_back": "123",
     "text_font": "DejaVu Sans",
-    "text_emboss_factor": 1.6,  # multiplier on wiggle amplitude at text points (1.0 = flat)
+    "text_emboss_factor": 1.5,  # multiplier on wiggle amplitude at text points (1.0 = flat)
 
     # ease-in/out and startup
     "ease_in_height": 4 * 0.2,
@@ -66,7 +66,6 @@ QUALITY_PRESETS = {
     "High (150k points)": 150_000,
 }
 
-MIN_CIRCUMFERENCE = 120.0
+MIN_CIRCUMFERENCE = 1.0
 MAX_CIRCUMFERENCE = 250.0
 MAX_TEXT_LENGTH = 20
-MAX_BANDS = 9

@@ -1,7 +1,7 @@
 """UWR Wristband Generator."""
 
 # App version — bump when UI, settings, or non-generation code changes.
-APP_VERSION = "1.4.0"
+APP_VERSION = "1.4.1"
 
 # Generator version — bump when generation logic changes (spiral math, text
 # projection, grid assembly, G-code output).  This is embedded in every

@@ -133,7 +133,7 @@ with st.sidebar:
             min_value=MIN_CIRCUMFERENCE,
             max_value=MAX_CIRCUMFERENCE,
             value=DEFAULTS["circumference"],
-            step=5.0,
+            step=1.0,
             help=(
                 "Inner circumference of the band in mm. Measure the wrist snugly "
                 "and subtract ~10 mm — the TPU stretches slightly when worn."
@@ -152,7 +152,7 @@ with st.sidebar:
             help="Total height (Z dimension) of the finished wristband.",
         )
         wiggle_amplitude = st.number_input(
-            "Wiggle amplitude", 10.0, 200.0, DEFAULTS["wiggle_amplitude"], step=5.0,
+            "Wiggle amplitude", 10.0, 100.0, DEFAULTS["wiggle_amplitude"], step=5.0,
             help=(
                 "Radial amplitude of the meander pattern. Higher = deeper wiggle, "
                 "more flex in the finished band but also more material."
@@ -171,7 +171,7 @@ with st.sidebar:
             1.0,
             DEFAULTS["per_layer_phase_shift"] / (2.0 * math.pi),
             step=0.005,
-            format="%.3f",
+            format="%.4f",
             help=(
                 "How far the wiggle pattern is advanced between consecutive "
                 "spiral turns, measured in units of the wiggle's own wavelength. "
@@ -187,8 +187,8 @@ with st.sidebar:
         )
         per_layer_phase_shift = phase_shift_fraction * 2.0 * math.pi
         text_size = st.number_input(
-            "Text size", 4.0, 20.0, DEFAULTS["text_size"], step=1.0,
-            help="Approximate text character height in mm on the side of the band.",
+            "Text size", 4.0, float(total_height), min(DEFAULTS["text_size"], float(total_height)), step=1.0,
+            help="Approximate text character height in mm on the side of the band. Capped at band height.",
         )
         text_emboss_factor = st.number_input(
             "Text emboss factor",
@@ -199,7 +199,7 @@ with st.sidebar:
             format="%.2f",
             help=(
                 "Multiplier on the wiggle amplitude at text points — controls how "
-                "far the text stands out from the band. 1.0 = flush, 1.6 = default, "
+                "far the text stands out from the band. 1.0 = flush, 1.5 = default, "
                 "higher = more pronounced relief."
             ),
         )
@@ -359,6 +359,7 @@ band_df = st.data_editor(
     default_df,
     width="stretch",
     num_rows="fixed",
+    key="band_table",
     column_config={
         "Enabled": st.column_config.CheckboxColumn(
             default=True,
@@ -372,7 +373,7 @@ band_df = st.data_editor(
         "Circumference (mm)": st.column_config.NumberColumn(
             min_value=MIN_CIRCUMFERENCE,
             max_value=MAX_CIRCUMFERENCE,
-            step=5.0,
+            step=1.0,
             format="%.0f",
         ),
     },
